@@ -28,7 +28,6 @@ public interface Village {
 
   void setOwnerId(String ownerId);
 
-
   ArrayList<Role> getRoleList();
 
   void setRoleList(ArrayList<Role> roleList);
