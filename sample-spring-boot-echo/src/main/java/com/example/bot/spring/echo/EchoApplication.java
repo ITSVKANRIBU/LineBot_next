@@ -17,8 +17,11 @@
 package com.example.bot.spring.echo;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -26,23 +29,30 @@ import com.example.bot.spring.entity.Village;
 import com.example.bot.staticdata.MessageConst;
 import com.example.bot.staticdata.VillageList;
 
+import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
+import lombok.NonNull;
+
 @SpringBootApplication
 @LineMessageHandler
 public class EchoApplication {
+  @Autowired
+  private LineMessagingClient lineMessagingClient;
+
   public static void main(String[] args) {
     SpringApplication.run(EchoApplication.class, args);
   }
 
   @EventMapping
-  public ReplyMessage handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
+  public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
     System.out.println("event: " + event);
     System.out.println("動いています通常");
 
@@ -55,13 +65,23 @@ public class EchoApplication {
     // 返信用メッセージ
     TextMessage textMessage = new TextMessage(message);
 
-    return new ReplyMessage(event.getReplyToken(), Arrays.asList(textMessage, textMessage));
+    reply(event.getReplyToken(), Arrays.asList(textMessage, textMessage));
   }
 
   @EventMapping
   public void handleDefaultMessageEvent(Event event) {
     System.out.println("event: " + event);
     System.out.println("動いています");
+  }
+
+  private void reply(@NonNull String replyToken, @NonNull List<Message> messages) {
+    try {
+      lineMessagingClient
+          .replyMessage(new ReplyMessage(replyToken, messages))
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private String getMessage(String userId, String userMessage) {
