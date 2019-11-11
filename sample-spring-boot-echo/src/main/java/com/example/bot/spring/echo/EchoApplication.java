@@ -123,7 +123,7 @@ public class EchoApplication {
             message = VillageList.get(i).getVillageNum() + "村 の人数を『" + number
                 + "人』に設定しました。"
                 + "\n皆さんに村番号を伝えてください。"
-                + "\n配布状況を確認したい場合は村番号を入力してください。";
+                + "\n自分のお題、状況を確認したい場合は村番号を入力してください。";
 
             break;
           }
@@ -131,8 +131,7 @@ public class EchoApplication {
       }
 
     } catch (Exception e) {
-      if ("お題".equals(userMessage.trim()) || "題".equals(userMessage.trim())
-          || "神".equals(userMessage.trim())) {
+      if ("村".equals(userMessage.trim())) {
         int villageNum = random.nextInt(8999) + 1000;
 
         // 重複しない番号取得（防止のため、100回まで）
@@ -154,30 +153,11 @@ public class EchoApplication {
         newVillage.setOwnerId(userId);
         newVillage.setVillageNum(villageNum);
 
-        if ("神".equals(userMessage.trim())) {
-          newVillage.setGmNum(MessageConst.DEFAULT_GMNUM);
-        }
-
         VillageList.addVillage(newVillage);
 
-        message = villageNum + "村 を新しく作成しました。\n" + MessageConst.OWNER_ODAIMESSAGE;
+        message = villageNum + "村 を新しく作成しました。\n" + MessageConst.OWNER_NUMSETMESSAGE;
 
-      } else {
-        for (int i = VillageList.getVillageList().size() - 1; i >= 0; i--) {
-          if (null == VillageList.get(i).getOdai()
-              && userId.equals(VillageList.get(i).getOwnerId())) {
-            VillageList.get(i).setOdai(userMessage);
-            message = VillageList.get(i).getVillageNum() + "村 のお題を『" + userMessage + "』に設定しました。\n";
-            if (VillageList.get(i).getGmNum() == MessageConst.DEFAULT_GMNUM) {
-              message = message + MessageConst.GOD_NUMSETMESSAGE;
-            } else {
-              message = message + MessageConst.OWNER_NUMSETMESSAGE;
-            }
-            break;
-          }
-        }
       }
-
     }
 
     return message;
@@ -194,7 +174,7 @@ public class EchoApplication {
 
     } else {
 
-      // 参加書の場合
+      // 参加者の場合
       String memberRole = village.getMemberRole(userId);
       if (memberRole == null) {
 
