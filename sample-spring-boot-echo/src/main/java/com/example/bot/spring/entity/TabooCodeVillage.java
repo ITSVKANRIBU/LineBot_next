@@ -16,6 +16,94 @@
 
 package com.example.bot.spring.entity;
 
-public class TabooCodeVillage {
+import java.util.ArrayList;
 
+import com.example.bot.staticdata.MessageConst;
+
+public class TabooCodeVillage implements Village {
+
+  private int villageNum;
+  private String ownerId;
+  private ArrayList<Role> roleList;
+  private int villageSize;
+
+  @Override
+  public int getVillageNum() {
+    return villageNum;
+  }
+
+  @Override
+  public void setVillageNum(int villageNum) {
+    this.villageNum = villageNum;
+  }
+
+  @Override
+  public String getOwnerId() {
+    return ownerId;
+  }
+
+  @Override
+  public void setOwnerId(String ownerId) {
+    this.ownerId = ownerId;
+  }
+
+  @Override
+  public ArrayList<Role> getRoleList() {
+    return roleList;
+  }
+
+  @Override
+  public void setRoleList(ArrayList<Role> roleList) {
+    this.roleList = roleList;
+  }
+
+  @Override
+  public void addRoleList(Role role) {
+    this.roleList.add(role);
+  }
+
+  @Override
+  public boolean hasOwner(String userId) {
+    return userId.equals(ownerId) ? true : false;
+  }
+
+  @Override
+  public int getVillageSize() {
+    return villageSize;
+  }
+
+  @Override
+  public void setVillageSize(int villageSize) {
+    this.villageSize = villageSize;
+  }
+
+  @Override
+  public Role getMemberRole(String userId) {
+    return roleList.stream()
+        .filter(obj -> obj.getUserId().equals(userId)).findFirst().orElse(null);
+  }
+
+  @Override
+  public String getRoleMessage(String userId) {
+    return null;
+  }
+
+  @Override
+  public ArrayList<String> getRoleMessages(String userId) {
+    ArrayList<String> rtnMessageList = new ArrayList<String>();
+
+    Role role = getMemberRole(userId);
+    if (role != null) {
+      rtnMessageList.add(MessageConst.DEFAILT_MESSAGE);
+    } else {
+      rtnMessageList.add("あなたは『" + getMemberRole(userId).getUserName() + "』です。");
+      for (int i = 0; i < roleList.size(); i++) {
+        if (!userId.equals(roleList.get(i).getUserId())) {
+          rtnMessageList.add(roleList.get(i).getMessage());
+        }
+      }
+    }
+
+    return rtnMessageList;
+  }
 }

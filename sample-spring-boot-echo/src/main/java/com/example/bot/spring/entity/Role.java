@@ -16,36 +16,19 @@
 
 package com.example.bot.spring.entity;
 
-import java.util.ArrayList;
+public interface Role {
 
-public interface Village {
+  String getUserId();
 
-  int getVillageNum();
+  void setUserId(String userId);
 
-  void setVillageNum(int villageNum);
+  String getRoleName();
 
-  String getOwnerId();
+  void setRoleName(String roleName);
 
-  void setOwnerId(String ownerId);
+  String getMessage();
 
+  String getUserName();
 
-  ArrayList<Role> getRoleList();
-
-  void setRoleList(ArrayList<Role> roleList);
-
-  void addRoleList(Role role);
-
-  boolean hasOwner(String userId);
-
-  int getVillageSize();
-
-  void setVillageSize(int villageSize);
-
-  // 持ってなかったらnullを返却
-  Role getMemberRole(String userId);
-
-  String getRoleMessage(String userId);
-
-  ArrayList<String> getRoleMessages(String userId);
-
+  void setUserName(String userName);
 }

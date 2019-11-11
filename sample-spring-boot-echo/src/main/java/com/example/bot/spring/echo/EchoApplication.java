@@ -16,7 +16,8 @@
 
 package com.example.bot.spring.echo;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -25,8 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.example.bot.spring.entity.Role;
+import com.example.bot.spring.entity.TabooCodeRole;
+import com.example.bot.spring.entity.TabooCodeVillage;
 import com.example.bot.spring.entity.Village;
 import com.example.bot.staticdata.MessageConst;
+import com.example.bot.staticdata.TabooConst;
 import com.example.bot.staticdata.VillageList;
 
 import com.linecorp.bot.client.LineMessagingClient;
@@ -60,18 +65,17 @@ public class EchoApplication {
     String userMessage = event.getMessage().getText();
 
     // messageの取得
-    String message = getMessage(userId, userMessage);
-
-    // 返信用メッセージ
-    TextMessage textMessage = new TextMessage(message);
-
-    reply(event.getReplyToken(), Arrays.asList(textMessage, textMessage));
+    replyMessage(event.getReplyToken(), userId, userMessage);
   }
 
   @EventMapping
   public void handleDefaultMessageEvent(Event event) {
     System.out.println("event: " + event);
     System.out.println("動いています");
+  }
+
+  private void reply(@NonNull String replyToken, @NonNull Message message) {
+    reply(replyToken, Collections.singletonList(message));
   }
 
   private void reply(@NonNull String replyToken, @NonNull List<Message> messages) {
@@ -84,7 +88,7 @@ public class EchoApplication {
     }
   }
 
-  private String getMessage(String userId, String userMessage) {
+  private void replyMessage(String replyToken, String userId, String userMessage) {
     String message = MessageConst.DEFAILT_MESSAGE;
 
     Random random = new Random();
@@ -94,7 +98,8 @@ public class EchoApplication {
 
       if (number > 100) {
         // 村番号の場合
-        return getMessageVillageNum(userId, number);
+        replyMessageVillageNum(replyToken, userId, number);
+        return;
       } else {
 
         // 人数が0のものを探す
@@ -108,16 +113,21 @@ public class EchoApplication {
 
             // 村人数設定
             VillageList.get(i).setVillageSize(number);
+            int tabooCode = random.nextInt(TabooConst.getTabooListSize());
 
-            // インサイダー位置設定
-            int insiderNum = random.nextInt(number) + 1;
-            VillageList.get(i).setInsiderNum(insiderNum);
-            if (VillageList.get(i).getGmNum() == MessageConst.DEFAULT_GMNUM) {
-              int gmNum = random.nextInt(number) + 1;
-              while (gmNum == insiderNum) {
-                gmNum = random.nextInt(number) + 1;
-              }
-              VillageList.get(i).setGmNum(gmNum);
+            TabooCodeRole masterRole = new TabooCodeRole();
+            masterRole.setUserName("村作成者");
+            masterRole.setUserId(userId);
+            masterRole.setTabooCode(tabooCode);
+            ArrayList<Role> roleList = new ArrayList<Role>();
+            roleList.add(masterRole);
+
+            for (int j = 1; j < number; j++) {
+              int tabooCodeSub = random.nextInt(TabooConst.getTabooListSize());
+              TabooCodeRole role = new TabooCodeRole();
+              role.setUserName((j + 1) + "番目の入室者");
+              role.setTabooCode(tabooCodeSub);
+              roleList.add(role);
             }
 
             message = VillageList.get(i).getVillageNum() + "村 の人数を『" + number
@@ -131,7 +141,7 @@ public class EchoApplication {
       }
 
     } catch (Exception e) {
-      if ("村".equals(userMessage.trim())) {
+      if ("タブーコード".equals(userMessage.trim())) {
         int villageNum = random.nextInt(8999) + 1000;
 
         // 重複しない番号取得（防止のため、100回まで）
@@ -149,7 +159,7 @@ public class EchoApplication {
           }
         }
 
-        Village newVillage = new Village();
+        Village newVillage = new TabooCodeVillage();
         newVillage.setOwnerId(userId);
         newVillage.setVillageNum(villageNum);
 
@@ -159,47 +169,43 @@ public class EchoApplication {
 
       }
     }
-
-    return message;
+    // リプライ
+    reply(replyToken, new TextMessage(message));
   }
 
-  private String getMessageVillageNum(String userId, int number) {
+  private void replyMessageVillageNum(String replyToken, String userId, int number) {
+    ArrayList<String> messageList = new ArrayList<String>();
     String message = MessageConst.DEFAILT_MESSAGE;
 
     Village village = VillageList.getVillage(number);
 
-    if (userId.equals(village.getOwnerId())) {
-      // オーナーの場合
-      message = village.getMessageOwner();
+    Role role = village.getMemberRole(userId);
+    if (role == null) {
+      long nonEntryNum = village.getRoleList().stream()
+          .filter(obj -> obj.getUserId() == null).count();
 
-    } else {
-
-      // 参加者の場合
-      String memberRole = village.getMemberRole(userId);
-      if (memberRole == null) {
-
-        if (village.getRoleList().size() >= village.getVillageSize()) {
-          message = "村がいっぱいです。";
-          return message;
-        }
-        // 配役の設定
-        village.addRoleList(
-            village.getInsiderNum() == village.getRoleList().size() + 1
-                ? MessageConst.INSIDER_ROLE
-                : village.getGmNum() == village.getRoleList().size() + 1
-                    ? MessageConst.GAMEMASTER_ROLE
-                    : MessageConst.VILLAGE_ROLE,
-            userId);
-
-        message = village.getRoleMessage(userId);
-
-      } else {
-        message = village.getRoleMessage(userId);
+      if (nonEntryNum < 1L) {
+        message = "村がいっぱいです。";
+        reply(replyToken, new TextMessage(message));
+        return;
       }
 
+      // 新たな入室
+      Role getRole = village.getRoleList().stream()
+          .filter(obj -> obj.getUserId() == null).findFirst().orElse(null);
+
+      getRole.setUserId(userId);
+
+    }
+    // 配役の設定
+    messageList = village.getRoleMessages(userId);
+
+    List<Message> rplyMessageList = new ArrayList<Message>();
+    for (String mes : messageList) {
+      rplyMessageList.add(new TextMessage(mes));
     }
 
-    return message;
+    reply(replyToken, rplyMessageList);
   }
 
 }

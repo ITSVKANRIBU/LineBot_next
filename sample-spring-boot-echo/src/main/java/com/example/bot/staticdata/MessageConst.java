@@ -18,8 +18,8 @@ package com.example.bot.staticdata;
 
 public class MessageConst {
 
-  public static final String DEFAILT_MESSAGE = "お題を配りたい方は「お題」または「神」を、\n"
-      + "お題及び役職を確認したい場合は村番号（数字4桁）を入力してください。";
+  public static final String DEFAILT_MESSAGE = "村を作成したい場合は「タブーコード」を、\n"
+      + "村の確認をしたい場合は村番号（数字4桁）を入力してください。";
 
   public static final String OWNER_NUMSETMESSAGE = "自分を含む人数を入力してください。";
 
