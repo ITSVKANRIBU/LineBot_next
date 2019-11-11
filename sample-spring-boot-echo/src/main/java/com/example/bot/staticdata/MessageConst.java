@@ -21,11 +21,8 @@ public class MessageConst {
   public static final String DEFAILT_MESSAGE = "お題を配りたい方は「お題」または「神」を、\n"
       + "お題及び役職を確認したい場合は村番号（数字4桁）を入力してください。";
 
-  public static final String OWNER_ODAIMESSAGE = "お題を入力してください。";
-  public static final String OWNER_NUMSETMESSAGE = "お題を配りたい人数を入力してください。"
-      + "\n　例：「5」の場合は、「インサイダー１人、村4人」です。";
-  public static final String GOD_NUMSETMESSAGE = "お題を配りたい人数を入力してください。"
-      + "\n　例：「6」の場合は、「GM１人、インサイダー１人、村4人」です。";
+  public static final String OWNER_NUMSETMESSAGE = "自分を含む人数を入力してください。";
+
   public static final String ERR_NUMSETMESSAGE = "村の人数は2人以上に設定してください。\n"
       + "もう一度村の人数を設定してください。";
   public static final String OWNER_CONFMESSAGE = "配布状況を確認したい場合は"

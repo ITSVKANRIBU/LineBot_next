@@ -1,0 +1,90 @@
+/*
+ * Copyright 2016 LINE Corporation
+ *
+ * LINE Corporation licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.example.bot.staticdata;
+
+import java.util.ArrayList;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class TabooConst {
+
+  private static ArrayList<String> TABOO_LIST;
+
+  static {
+    TABOO_LIST = new ArrayList<String>();
+
+    String path = new File(".").getAbsoluteFile().getParent();
+    File file = new File(path + "/src/main/resources/tabooList.txt");
+
+    try {
+      //文字コードUTF-8を指定してファイルを読み込む
+      FileInputStream input = new FileInputStream(file);
+      InputStreamReader stream = new InputStreamReader(input, "UTF-8");
+      BufferedReader buffer = new BufferedReader(stream);
+
+      String str;
+
+      //ファイルの最終行まで読み込む
+      while ((str = buffer.readLine()) != null) {
+        System.out.println(str);
+        TABOO_LIST.add(str);
+      }
+
+      buffer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void main(String[] args) {
+
+    String path = new File(".").getAbsoluteFile().getParent();
+    File file = new File(path + "/src/main/resources/tabooList.txt");
+
+    try {
+      //文字コードUTF-8を指定してファイルを読み込む
+      FileInputStream input = new FileInputStream(file);
+      InputStreamReader stream = new InputStreamReader(input, "UTF-8");
+      BufferedReader buffer = new BufferedReader(stream);
+
+      String str;
+
+      //ファイルの最終行まで読み込む
+      while ((str = buffer.readLine()) != null) {
+        System.out.println(str);
+      }
+
+      buffer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static String getTabooList(int i) {
+
+    if (TABOO_LIST.size() > i) {
+      return TABOO_LIST.get(i);
+    }
+
+    return null;
+  }
+
+}
