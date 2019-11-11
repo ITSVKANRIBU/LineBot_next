@@ -16,13 +16,13 @@
 
 package com.example.bot.staticdata;
 
-import java.util.ArrayList;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import java.util.ArrayList;
 
 public class TabooConst {
 
@@ -46,30 +46,6 @@ public class TabooConst {
       while ((str = buffer.readLine()) != null) {
         System.out.println(str);
         TABOO_LIST.add(str);
-      }
-
-      buffer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) {
-
-    String path = new File(".").getAbsoluteFile().getParent();
-    File file = new File(path + "/src/main/resources/tabooList.txt");
-
-    try {
-      //文字コードUTF-8を指定してファイルを読み込む
-      FileInputStream input = new FileInputStream(file);
-      InputStreamReader stream = new InputStreamReader(input, "UTF-8");
-      BufferedReader buffer = new BufferedReader(stream);
-
-      String str;
-
-      //ファイルの最終行まで読み込む
-      while ((str = buffer.readLine()) != null) {
-        System.out.println(str);
       }
 
       buffer.close();
