@@ -44,6 +44,7 @@ public class EchoApplication {
   @EventMapping
   public ReplyMessage handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
     System.out.println("event: " + event);
+    System.out.println("動いています通常");
 
     String userId = event.getSource().getUserId();
     String userMessage = event.getMessage().getText();
@@ -60,6 +61,7 @@ public class EchoApplication {
   @EventMapping
   public void handleDefaultMessageEvent(Event event) {
     System.out.println("event: " + event);
+    System.out.println("動いています");
   }
 
   private String getMessage(String userId, String userMessage) {
