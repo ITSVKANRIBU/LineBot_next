@@ -16,6 +16,7 @@
 
 package com.example.bot.spring.echo;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import org.springframework.boot.SpringApplication;
@@ -28,8 +29,8 @@ import com.example.bot.staticdata.VillageList;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
@@ -41,7 +42,7 @@ public class EchoApplication {
   }
 
   @EventMapping
-  public Message handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
+  public ReplyMessage handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
     System.out.println("event: " + event);
 
     String userId = event.getSource().getUserId();
@@ -50,7 +51,10 @@ public class EchoApplication {
     // messageの取得
     String message = getMessage(userId, userMessage);
 
-    return new TextMessage(message);
+    // 返信用メッセージ
+    TextMessage textMessage = new TextMessage(message);
+
+    return new ReplyMessage(event.getReplyToken(), Arrays.asList(textMessage, textMessage));
   }
 
   @EventMapping
