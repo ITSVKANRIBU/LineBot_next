@@ -142,6 +142,9 @@ public class EchoApplication {
       }
 
     } catch (Exception e) {
+      if (!NumberFormatException.class.isInstance(e)) {
+        e.printStackTrace();
+      }
       if ("タブーコード".equals(userMessage.trim())) {
         int villageNum = random.nextInt(8999) + 1000;
 
