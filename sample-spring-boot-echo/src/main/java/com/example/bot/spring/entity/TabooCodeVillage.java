@@ -93,7 +93,7 @@ public class TabooCodeVillage implements Village {
     ArrayList<String> rtnMessageList = new ArrayList<String>();
 
     Role role = getMemberRole(userId);
-    if (role != null) {
+    if (role == null) {
       rtnMessageList.add(MessageConst.DEFAILT_MESSAGE);
     } else {
       rtnMessageList.add("あなたは『" + getMemberRole(userId).getUserName() + "』です。");
