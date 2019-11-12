@@ -84,7 +84,7 @@ public class EchoApplication {
           .replyMessage(new ReplyMessage(replyToken, messages))
           .get();
     } catch (InterruptedException | ExecutionException e) {
-      throw new RuntimeException(e);
+      e.printStackTrace();
     }
   }
 
@@ -129,6 +129,7 @@ public class EchoApplication {
               role.setTabooCode(tabooCodeSub);
               roleList.add(role);
             }
+            VillageList.get(i).setRoleList(roleList);
 
             message = VillageList.get(i).getVillageNum() + "村 の人数を『" + number
                 + "人』に設定しました。"
@@ -174,10 +175,13 @@ public class EchoApplication {
   }
 
   private void replyMessageVillageNum(String replyToken, String userId, int number) {
-    ArrayList<String> messageList = new ArrayList<String>();
-    String message = MessageConst.DEFAILT_MESSAGE;
-
     Village village = VillageList.getVillage(number);
+
+    if (village == null) {
+      String message = MessageConst.DEFAILT_MESSAGE;
+      reply(replyToken, new TextMessage(message));
+      return;
+    }
 
     Role role = village.getMemberRole(userId);
     if (role == null) {
@@ -185,8 +189,7 @@ public class EchoApplication {
           .filter(obj -> obj.getUserId() == null).count();
 
       if (nonEntryNum < 1L) {
-        message = "村がいっぱいです。";
-        reply(replyToken, new TextMessage(message));
+        reply(replyToken, new TextMessage("村がいっぱいです。"));
         return;
       }
 
@@ -197,8 +200,7 @@ public class EchoApplication {
       getRole.setUserId(userId);
 
     }
-    // 配役の設定
-    messageList = village.getRoleMessages(userId);
+    ArrayList<String> messageList = village.getRoleMessages(userId);
 
     List<Message> rplyMessageList = new ArrayList<Message>();
     for (String mes : messageList) {

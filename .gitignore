@@ -53,3 +53,7 @@ local.properties
 
 # PDT-specific
 .buildpath
+*.class
+.gitignore
+*.prefs
+*.json
