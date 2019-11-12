@@ -100,14 +100,15 @@ public class TabooCodeVillage implements Village {
       int diviceNum = (villageSize - 1) / 5;
       for (int i = 0; i < roleList.size(); i++) {
         if (!userId.equals(roleList.get(i).getUserId())) {
-          rtnMessageList.add(roleList.get(i).getMessage());
+          String message = roleList.get(i).getMessage();
           for (int j = 0; j < diviceNum; j++) {
             i++;
             if (i >= roleList.size()) {
               break;
             }
-            rtnMessageList.add(roleList.get(i).getMessage());
+            message = message.concat("\n\n" + roleList.get(i).getMessage());
           }
+          rtnMessageList.add(message);
         }
       }
     }

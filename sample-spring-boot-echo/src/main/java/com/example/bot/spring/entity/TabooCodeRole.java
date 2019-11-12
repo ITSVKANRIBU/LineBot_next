@@ -64,7 +64,7 @@ public class TabooCodeRole implements Role {
   }
 
   public String getMessage() {
-    String message = "『" + userName + "』のタブーコードは、\n" + TabooConst.getTabooList(tabooCode);
+    String message = "『" + userName + "』は、\n" + TabooConst.getTabooList(tabooCode);
 
     return message;
   }

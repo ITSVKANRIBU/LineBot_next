@@ -116,7 +116,7 @@ public class EchoApplication {
             int tabooCode = random.nextInt(TabooConst.getTabooListSize());
 
             TabooCodeRole masterRole = new TabooCodeRole();
-            masterRole.setUserName("村作成者");
+            masterRole.setUserName("1番目の入室者");
             masterRole.setUserId(userId);
             masterRole.setTabooCode(tabooCode);
             ArrayList<Role> roleList = new ArrayList<Role>();
@@ -145,7 +145,7 @@ public class EchoApplication {
       if (!NumberFormatException.class.isInstance(e)) {
         e.printStackTrace();
       }
-      if ("タブーコード".equals(userMessage.trim())) {
+      if ("タブー".equals(userMessage.trim())) {
         int villageNum = random.nextInt(8999) + 1000;
 
         // 重複しない番号取得（防止のため、100回まで）
