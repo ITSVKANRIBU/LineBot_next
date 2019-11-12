@@ -135,6 +135,7 @@ public class EchoApplication {
             for (int j = 1; j < number; j++) {
               int tabooCodeSub = random.nextInt(TabooConst.getTabooListSize());
               TabooCodeRole role = new TabooCodeRole();
+              role.setRoleName((j + 1) + "番目の入室者");
               role.setUserName((j + 1) + "番目の入室者");
               role.setTabooCode(tabooCodeSub);
               roleList.add(role);
