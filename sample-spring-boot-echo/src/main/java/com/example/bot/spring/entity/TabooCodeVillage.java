@@ -80,7 +80,7 @@ public class TabooCodeVillage implements Village {
   @Override
   public Role getMemberRole(String userId) {
     return roleList.stream()
-        .filter(obj -> obj.getUserId().equals(userId)).findFirst().orElse(null);
+        .filter(obj -> userId.equals(obj.getUserId())).findFirst().orElse(null);
   }
 
   @Override
