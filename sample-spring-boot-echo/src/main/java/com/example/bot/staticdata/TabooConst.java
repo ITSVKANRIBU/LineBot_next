@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 public class TabooConst {
 
+  public static final boolean DISPLAY_NAME_FLG = true;
   private static ArrayList<String> TABOO_LIST;
 
   static {

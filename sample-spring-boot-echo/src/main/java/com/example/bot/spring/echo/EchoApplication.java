@@ -64,15 +64,17 @@ public class EchoApplication {
 
     String userId = event.getSource().getUserId();
     String userMessage = event.getMessage().getText();
+    String userName = "";
     try {
       UserProfileResponse userProfile = lineMessagingClient.getProfile(userId).get();
-      System.out.println("このユーザーは" + userProfile.getDisplayName());
+      userName = userProfile.getDisplayName();
+      System.out.println("ユーザー" + userName);
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
 
     // messageの取得
-    replyMessage(event.getReplyToken(), userId, userMessage);
+    replyMessage(event.getReplyToken(), userId, userName, userMessage);
   }
 
   @EventMapping
@@ -95,7 +97,8 @@ public class EchoApplication {
     }
   }
 
-  private void replyMessage(String replyToken, String userId, String userMessage) {
+  private void replyMessage(String replyToken, String userId,
+      String userName, String userMessage) {
     String message = MessageConst.DEFAILT_MESSAGE;
 
     Random random = new Random();
@@ -105,7 +108,7 @@ public class EchoApplication {
 
       if (number > 100) {
         // 村番号の場合
-        replyMessageVillageNum(replyToken, userId, number);
+        replyMessageVillageNum(replyToken, userId, userName, number);
         return;
       } else {
 
@@ -123,7 +126,7 @@ public class EchoApplication {
             int tabooCode = random.nextInt(TabooConst.getTabooListSize());
 
             TabooCodeRole masterRole = new TabooCodeRole();
-            masterRole.setUserName("1番目の入室者");
+            masterRole.setUserName(TabooConst.DISPLAY_NAME_FLG ? userName : "1番目の入室者");
             masterRole.setUserId(userId);
             masterRole.setTabooCode(tabooCode);
             ArrayList<Role> roleList = new ArrayList<Role>();
@@ -191,7 +194,8 @@ public class EchoApplication {
     reply(replyToken, new TextMessage(message));
   }
 
-  private void replyMessageVillageNum(String replyToken, String userId, int number) {
+  private void replyMessageVillageNum(String replyToken, String userId,
+      String userName, int number) {
     Village village = VillageList.getVillage(number);
 
     if (village == null) {
@@ -215,6 +219,9 @@ public class EchoApplication {
           .filter(obj -> obj.getUserId() == null).findFirst().orElse(null);
 
       getRole.setUserId(userId);
+      if (TabooConst.DISPLAY_NAME_FLG) {
+        getRole.setUserName(userName);
+      }
 
     }
     ArrayList<String> messageList = village.getRoleMessages(userId);
