@@ -171,6 +171,13 @@ public class EchoApplication {
 
         message = villageNum + "村 を新しく作成しました。\n" + MessageConst.OWNER_NUMSETMESSAGE;
 
+      } else if ("ルール".equals(userMessage.trim())) {
+        List<Message> messages = new ArrayList<Message>();
+        messages.add(new TextMessage(MessageConst.RULE_FIRST));
+        messages.add(new TextMessage(MessageConst.RULE_SECOND));
+        messages.add(new TextMessage(MessageConst.RULE_THIRD));
+        messages.add(new TextMessage(MessageConst.RULE_HINT));
+        reply(replyToken, messages);
       }
     }
     // リプライ
