@@ -41,6 +41,7 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.profile.UserProfileResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
@@ -63,6 +64,12 @@ public class EchoApplication {
 
     String userId = event.getSource().getUserId();
     String userMessage = event.getMessage().getText();
+    try {
+      UserProfileResponse userProfile = lineMessagingClient.getProfile(userId).get();
+      System.out.println("このユーザーは" + userProfile.getDisplayName());
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
 
     // messageの取得
     replyMessage(event.getReplyToken(), userId, userMessage);
