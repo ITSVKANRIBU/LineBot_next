@@ -30,8 +30,7 @@ public class TabooConst {
   static {
     TABOO_LIST = new ArrayList<String>();
 
-    String path = new File(".").getAbsoluteFile().getParent();
-    File file = new File(path + "/src/main/resources/tabooList.txt");
+    File file = new File("/app/sample-spring-boot-echo/src/main/resources/tabooList.txt");
 
     try {
       //文字コードUTF-8を指定してファイルを読み込む
