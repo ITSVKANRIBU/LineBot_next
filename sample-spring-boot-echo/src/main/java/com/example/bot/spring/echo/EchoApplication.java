@@ -39,6 +39,7 @@ import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -126,6 +127,7 @@ public class EchoApplication {
             int tabooCode = random.nextInt(TabooConst.getTabooListSize());
 
             TabooCodeRole masterRole = new TabooCodeRole();
+            masterRole.setRoleName("1番目の入室者");
             masterRole.setUserName(TabooConst.DISPLAY_NAME_FLG ? userName : "1番目の入室者");
             masterRole.setUserId(userId);
             masterRole.setTabooCode(tabooCode);
@@ -188,6 +190,7 @@ public class EchoApplication {
         messages.add(new TextMessage(MessageConst.RULE_SECOND));
         messages.add(new TextMessage(MessageConst.RULE_THIRD));
         messages.add(new TextMessage(MessageConst.RULE_HINT));
+        messages.add(new ImageMessage(TabooConst.IMAGE_01_URL, TabooConst.IMAGE_01_URL));
         reply(replyToken, messages);
       }
     }
