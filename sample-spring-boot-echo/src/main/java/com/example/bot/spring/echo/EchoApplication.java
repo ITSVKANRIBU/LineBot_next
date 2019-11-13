@@ -36,12 +36,15 @@ import com.example.bot.staticdata.VillageList;
 
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
+import com.linecorp.bot.model.action.MessageAction;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
+import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
@@ -84,8 +87,18 @@ public class EchoApplication {
     System.out.println("動いています");
   }
 
-  private void reply(@NonNull String replyToken, @NonNull Message message) {
-    reply(replyToken, Collections.singletonList(message));
+  private void replyDefoltMessage(@NonNull String replyToken) {
+    ConfirmTemplate confirmTemplate = new ConfirmTemplate("ルール確認、または村の作成をしますか？",
+        new MessageAction("村作成", "タブー"),
+        new MessageAction("ルール確認", "ルール"));
+    try {
+      lineMessagingClient
+          .replyMessage(new ReplyMessage(replyToken,
+              new TemplateMessage("明日は燃えるごみの日だよ！", confirmTemplate)))
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
   }
 
   private void reply(@NonNull String replyToken, @NonNull List<Message> messages) {
@@ -189,13 +202,18 @@ public class EchoApplication {
         messages.add(new TextMessage(MessageConst.RULE_FIRST));
         messages.add(new TextMessage(MessageConst.RULE_SECOND));
         messages.add(new TextMessage(MessageConst.RULE_THIRD));
-        messages.add(new TextMessage(MessageConst.RULE_HINT));
-        messages.add(new ImageMessage(TabooConst.IMAGE_01_URL, TabooConst.IMAGE_01_URL));
+        //messages.add(new TextMessage(MessageConst.RULE_HINT));
+        messages.add(new ImageMessage(TabooConst.IMAGE_02_URL, TabooConst.IMAGE_02_URL));
         reply(replyToken, messages);
       }
     }
+
     // リプライ
-    reply(replyToken, new TextMessage(message));
+    if (MessageConst.DEFAILT_MESSAGE.equals(message)) {
+      replyDefoltMessage(replyToken);
+    } else {
+      reply(replyToken, Collections.singletonList(new TextMessage(message)));
+    }
   }
 
   private void replyMessageVillageNum(String replyToken, String userId,
@@ -203,8 +221,7 @@ public class EchoApplication {
     Village village = VillageList.getVillage(number);
 
     if (village == null) {
-      String message = MessageConst.DEFAILT_MESSAGE;
-      reply(replyToken, new TextMessage(message));
+      replyDefoltMessage(replyToken);
       return;
     }
 
@@ -214,7 +231,7 @@ public class EchoApplication {
           .filter(obj -> obj.getUserId() == null).count();
 
       if (nonEntryNum < 1L) {
-        reply(replyToken, new TextMessage("村がいっぱいです。"));
+        reply(replyToken, Collections.singletonList(new TextMessage("村の人数が上限です。")));
         return;
       }
 

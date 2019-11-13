@@ -28,6 +28,8 @@ public class TabooConst {
   public static final boolean DISPLAY_NAME_FLG = true;
   public static final String IMAGE_01_URL = "https://raw.githubusercontent.com"
       + "/ITSVKANRIBU/LineBot_next/3.0/image/01.png";
+  public static final String IMAGE_02_URL = "https://raw.githubusercontent.com"
+      + "/ITSVKANRIBU/LineBot_next/3.0/image/02.png";
   private static ArrayList<String> TABOO_LIST;
 
   static {
