@@ -44,6 +44,7 @@ import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.message.template.ButtonsTemplate;
 import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
@@ -88,13 +89,14 @@ public class EchoApplication {
   }
 
   private void replyDefoltMessage(@NonNull String replyToken) {
-    ConfirmTemplate confirmTemplate = new ConfirmTemplate("ルール確認、または村の作成をしますか？",
+    ConfirmTemplate confirmTemplate = new ConfirmTemplate("村番号（数字4桁の入力）をしてください。"
+        + "ルール確認、または村の作成をする人は以下を選択してください。",
         new MessageAction("村作成", "タブー"),
         new MessageAction("ルール確認", "ルール"));
     try {
       lineMessagingClient
           .replyMessage(new ReplyMessage(replyToken,
-              new TemplateMessage("明日は燃えるごみの日だよ！", confirmTemplate)))
+              new TemplateMessage("タブ―コード応答メッセージ！", confirmTemplate)))
           .get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
@@ -159,10 +161,17 @@ public class EchoApplication {
 
             message = VillageList.get(i).getVillageNum() + "村 の人数を『" + number
                 + "人』に設定しました。"
-                + "\n皆さんに村番号を伝えてください。"
-                + "\n自分のお題、状況を確認したい場合は村番号を入力してください。";
+                + "\n皆さんに村番号を伝えてください。";
 
-            break;
+            ButtonsTemplate buttons = new ButtonsTemplate("", "", "確認する",
+                Collections.singletonList(
+                    new MessageAction("確認", String.valueOf(VillageList.get(i).getVillageNum()))));
+
+            List<Message> rplyMessageList = new ArrayList<Message>();
+            rplyMessageList.add(new TextMessage(message));
+            rplyMessageList.add(new TemplateMessage("タブ―コード応答メッセージ", buttons));
+            reply(replyToken, rplyMessageList);
+            return;
           }
         }
       }
