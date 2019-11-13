@@ -30,6 +30,8 @@ public class TabooConst {
       + "/ITSVKANRIBU/LineBot_next/3.0/image/01.png";
   public static final String IMAGE_02_URL = "https://raw.githubusercontent.com"
       + "/ITSVKANRIBU/LineBot_next/3.0/image/02.png";
+  public static final String IMAGE_03_URL = "https://raw.githubusercontent.com"
+      + "/ITSVKANRIBU/LineBot_next/3.0/image/03.png";
   private static ArrayList<String> TABOO_LIST;
 
   static {

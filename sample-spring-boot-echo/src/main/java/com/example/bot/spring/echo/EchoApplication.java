@@ -89,8 +89,7 @@ public class EchoApplication {
   }
 
   private void replyDefoltMessage(@NonNull String replyToken) {
-    ConfirmTemplate confirmTemplate = new ConfirmTemplate("村番号（数字4桁の入力）をしてください。"
-        + "ルール確認、または村の作成をする人は以下を選択してください。",
+    ConfirmTemplate confirmTemplate = new ConfirmTemplate("ルール確認、または村の作成をしますか？",
         new MessageAction("村作成", "タブー"),
         new MessageAction("ルール確認", "ルール"));
     try {
@@ -163,12 +162,12 @@ public class EchoApplication {
                 + "人』に設定しました。"
                 + "\n皆さんに村番号を伝えてください。";
 
-            ButtonsTemplate buttons = new ButtonsTemplate("", "", "確認する",
-                Collections.singletonList(
+            ButtonsTemplate buttons = new ButtonsTemplate(TabooConst.IMAGE_03_URL,
+                VillageList.get(i).getVillageNum() + "村", message, Collections.singletonList(
                     new MessageAction("確認", String.valueOf(VillageList.get(i).getVillageNum()))));
 
             List<Message> rplyMessageList = new ArrayList<Message>();
-            rplyMessageList.add(new TextMessage(message));
+            //rplyMessageList.add(new TextMessage(message));
             rplyMessageList.add(new TemplateMessage("タブ―コード応答メッセージ", buttons));
             reply(replyToken, rplyMessageList);
             return;
