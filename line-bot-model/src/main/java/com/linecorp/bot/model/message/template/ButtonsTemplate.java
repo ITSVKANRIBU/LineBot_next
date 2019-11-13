@@ -136,7 +136,8 @@ public class ButtonsTemplate implements Template {
         this.defaultAction = null;
         this.actions = actions != null ? actions : Collections.emptyList();
         this.imageAspectRatio = null;
-        this.imageSize = null;
+        this.imageSize = "contain";
         this.imageBackgroundColor = null;
     }
+
 }
