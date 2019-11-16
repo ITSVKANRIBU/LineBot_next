@@ -45,7 +45,6 @@ import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.message.template.ButtonsTemplate;
-import com.linecorp.bot.model.message.template.ButtonsTemplateNonAction;
 import com.linecorp.bot.model.message.template.ButtonsTemplateNonURL;
 import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -229,9 +228,11 @@ public class EchoApplication {
             villageNum + "村", message, Collections.singletonList(
                 new MessageAction("確認", villageNum)));
 
-        ButtonsTemplateNonAction buttons2 = new ButtonsTemplateNonAction(
+        ButtonsTemplate buttons2 = new ButtonsTemplate(
             TabooConst.IMAGE_GOD_URL,
-            villageNum + "村", "紙です");
+            villageNum + "村", "あなたは神です",
+            Collections.singletonList(
+                new MessageAction("確認", villageNum)));
 
         List<Message> rplyMessageList = new ArrayList<Message>();
         //rplyMessageList.add(new TextMessage(message));
