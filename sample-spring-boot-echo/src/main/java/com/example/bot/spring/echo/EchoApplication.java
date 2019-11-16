@@ -45,6 +45,8 @@ import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.message.template.ButtonsTemplate;
+import com.linecorp.bot.model.message.template.ButtonsTemplateNonAction;
+import com.linecorp.bot.model.message.template.ButtonsTemplateNonURL;
 import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
@@ -162,7 +164,7 @@ public class EchoApplication {
                 + "人』に設定しました。"
                 + "\n皆さんに村番号を伝えてください。";
 
-            ButtonsTemplate buttons = new ButtonsTemplate(TabooConst.IMAGE_03_URL,
+            ButtonsTemplateNonURL buttons = new ButtonsTemplateNonURL(
                 VillageList.get(i).getVillageNum() + "村", message, Collections.singletonList(
                     new MessageAction("確認", String.valueOf(VillageList.get(i).getVillageNum()))));
 
@@ -213,6 +215,30 @@ public class EchoApplication {
         //messages.add(new TextMessage(MessageConst.RULE_HINT));
         messages.add(new ImageMessage(TabooConst.IMAGE_02_URL, TabooConst.IMAGE_02_URL));
         reply(replyToken, messages);
+        return;
+
+      } else if ("test".equals(userMessage.trim())) {
+
+        String villageNum = "1111";
+        message = villageNum + "村 の人数を『" + villageNum
+            + "人』に設定しました。"
+            + "\n皆さんに村番号を伝えてください。";
+
+        ButtonsTemplate buttons = new ButtonsTemplate(
+            TabooConst.IMAGE_GOD_URL,
+            villageNum + "村", message, Collections.singletonList(
+                new MessageAction("確認", villageNum)));
+
+        ButtonsTemplateNonAction buttons2 = new ButtonsTemplateNonAction(
+            TabooConst.IMAGE_GOD_URL,
+            villageNum + "村", "紙です");
+
+        List<Message> rplyMessageList = new ArrayList<Message>();
+        //rplyMessageList.add(new TextMessage(message));
+        rplyMessageList.add(new TemplateMessage("タブ―コード応答メッセージ", buttons));
+        rplyMessageList.add(new TemplateMessage("タブ―コード応答メッセージ", buttons2));
+        reply(replyToken, rplyMessageList);
+        return;
       }
     }
 
