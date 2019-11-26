@@ -20,6 +20,7 @@ dependencies {
     compile project(':line-bot-servlet')
     compile 'org.springframework.boot:spring-boot-autoconfigure'
     compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     optional 'javax.validation:validation-api'
 }

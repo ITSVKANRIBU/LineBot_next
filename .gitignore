@@ -57,3 +57,5 @@ local.properties
 .gitignore
 *.prefs
 *.json
+*/bin/*
+*/sample-spring-boot-echo-kotlin/*

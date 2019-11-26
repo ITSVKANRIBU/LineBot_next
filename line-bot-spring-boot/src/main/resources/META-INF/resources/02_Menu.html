@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        
+        <!-- Original CSS -->
+        <link href="./contents/css/ress.css" rel="stylesheet" type="text/css"> <!-- リセット用、スタイルが崩れないようにするため -->
+        <link href="./contents/css/main.css" rel="stylesheet" type="text/css">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" type="text/css" href="./bootstrap4/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+           
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script type="text/javascript" src="./bootstrap4/js/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="./bootstrap4/js/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="./bootstrap4/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        
+        <!-- Orignal JavaScript UOC部分 -->
+        <script src="./contents/js/main.js"></script>
+        
+        
+        <title>メニュー画面</title>
+    </head>
+    <body>
+        <script>includeHtml("./contents/include/header_contents.html");</script>
+        
+        <!-- コンテンツ -->
+        <div class="titlearea">
+            <p>メニュー画面</p>
+        </div>
+        <p class="menuBackground">
+            &nbsp;
+        </p>
+        <div class="menu">
+            <table class="menutable">
+                <tr class="menutr">
+                    <th class="menuth">
+                        <form action="./03_EmployeeList.html">
+                            <button type="submit" class="menubtn">社員一覧</button>
+                        </form>
+                    </th>
+                    <td class="menutd">社員の一覧を表示します。社員情報の詳細確認、変更、削除ができます。</td>
+                </tr>
+                <tr class="menutr">
+                    <th class="menuth">
+                        <form action="./07_EmployeeEntry.html">
+                            <button type="submit" class="menubtn">社員登録</button>
+                        </form>
+                    </th>
+                    <td class="menutd">新規に社員を登録します。</td>
+                </tr>
+                <tr class="menutr">
+                    <th class="menuth">
+                        <form action="./01_Login.html">
+                            <button type="submit" class="menubtn">ログアウト</button>
+                        </form>
+                    </th>
+                    <td class="menutd">システムからログアウトします。</td>
+                </tr>
+            </table>
+        </div>
+        <script>includeHtml("./contents/include/footer.html");</script>
+    </body>
+</html>
