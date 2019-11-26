@@ -23,13 +23,13 @@
 		<div id="form-main">
 		<div id="form-div">
 		<form class="form" id="form1">
-			<p class="email">
-				<input name="subject" type="text" class="feedback-input" id="subject" placeholder="お題（必須）" required maxlength="30"/>
+			<p class="subject">
+				<input name="subject" type="text" class="feedback-input" id="subject" placeholder="お題（必須）" required maxlength="30" autocomplete="off"/>
 			</p>
 			<p class="name">
-				<input name="name" type="text" class="feedback-input" placeholder="投稿者（任意）" id="name" maxlength="20"/>
+				<input name="name" type="text" class="feedback-input" placeholder="投稿者（任意）" id="name" maxlength="20" />
 			</p>
-			<p class="難易度">
+			<p class="difficulty">
 				<select name="horoscope" name="difficulty" id="difficulty" class="feedback-input" >
 				<option value="" disabled selected class="placeholder">難易度（任意）</option>
 				<option value="1">簡単</option>
@@ -37,7 +37,7 @@
 				<option value="10">難しい</option>
 			</p>
 			<p class="text">
-				<textarea name="text" class="feedback-input" id="comment" placeholder="コメント（任意）" maxlength="200"></textarea>
+				<textarea name="text" class="feedback-input" id="comment" placeholder="コメント（任意）" maxlength="200" autocomplete="off"></textarea>
 			</p>
 			<div class="submit">
 			<input type="submit" value="登録" id="button-blue"/>
