@@ -36,8 +36,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.ui.Model;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -78,194 +78,198 @@ import lombok.extern.slf4j.Slf4j;
 @Import(ReplyByReturnValueConsumer.Factory.class)
 @ConditionalOnProperty(name = "line.bot.handler.enabled", havingValue = "true", matchIfMissing = true)
 public class LineMessageHandlerSupport {
-    private static final Comparator<HandlerMethod> HANDLER_METHOD_PRIORITY_COMPARATOR =
-            Comparator.comparing(HandlerMethod::getPriority).reversed();
-    private final ReplyByReturnValueConsumer.Factory returnValueConsumerFactory;
-    private final ConfigurableApplicationContext applicationContext;
+  private static final Comparator<HandlerMethod> HANDLER_METHOD_PRIORITY_COMPARATOR = Comparator
+      .comparing(HandlerMethod::getPriority).reversed();
+  private final ReplyByReturnValueConsumer.Factory returnValueConsumerFactory;
+  private final ConfigurableApplicationContext applicationContext;
 
-    volatile List<HandlerMethod> eventConsumerList;
+  volatile List<HandlerMethod> eventConsumerList;
 
-    @Autowired
-    public LineMessageHandlerSupport(
-            final ReplyByReturnValueConsumer.Factory returnValueConsumerFactory,
-            final ConfigurableApplicationContext applicationContext) {
-        this.returnValueConsumerFactory = returnValueConsumerFactory;
-        this.applicationContext = applicationContext;
+  @Autowired
+  public LineMessageHandlerSupport(
+      final ReplyByReturnValueConsumer.Factory returnValueConsumerFactory,
+      final ConfigurableApplicationContext applicationContext) {
+    this.returnValueConsumerFactory = returnValueConsumerFactory;
+    this.applicationContext = applicationContext;
 
-        applicationContext.addApplicationListener(event -> {
-            if (event instanceof ContextRefreshedEvent) {
-                refresh();
-            }
-        });
+    applicationContext.addApplicationListener(event -> {
+      if (event instanceof ContextRefreshedEvent) {
+        refresh();
+      }
+    });
+  }
+
+  @VisibleForTesting
+  void refresh() {
+    final Map<String, Object> handlerBeanMap = applicationContext
+        .getBeansWithAnnotation(LineMessageHandler.class);
+
+    final List<HandlerMethod> collect = handlerBeanMap
+        .values().stream()
+        .flatMap((Object bean) -> {
+          final Method[] uniqueDeclaredMethods = ReflectionUtils
+              .getUniqueDeclaredMethods(bean.getClass());
+
+          return Arrays.stream(uniqueDeclaredMethods)
+              .map(method -> getMethodHandlerMethodFunction(bean, method))
+              .filter(Objects::nonNull);
+        })
+        .sorted(HANDLER_METHOD_PRIORITY_COMPARATOR)
+        .collect(Collectors.toList());
+
+    log.info("Registered LINE Messaging API event handler: count = {}", collect.size());
+    collect.forEach(item -> log.info("Mapped \"{}\" onto {}",
+        item.getSupportType(), item.getHandler().toGenericString()));
+
+    eventConsumerList = collect;
+  }
+
+  private HandlerMethod getMethodHandlerMethodFunction(Object consumer, Method method) {
+    final EventMapping mapping = AnnotatedElementUtils.getMergedAnnotation(method, EventMapping.class);
+    if (mapping == null) {
+      return null;
     }
 
-    @GetMapping("/test")
-    public ModelAndView test(Model model) {
-      System.out.println("起動");
-      model.addAttribute("testKey", "Test Thymeleaf!!");
-      return new ModelAndView("01_Login.html");
+    Preconditions.checkState(method.getParameterCount() == 1,
+        "Number of parameter should be 1. But {}",
+        (Object[]) method.getParameterTypes());
+    // TODO: Support more than 1 argument. Like MVC's argument resolver?
+
+    final Type type = method.getGenericParameterTypes()[0];
+
+    final Predicate<Event> predicate = new EventPredicate(type);
+    return new HandlerMethod(predicate, consumer, method,
+        getPriority(mapping, type));
+  }
+
+  private int getPriority(final EventMapping mapping, final Type type) {
+    if (mapping.priority() != EventMapping.DEFAULT_PRIORITY_VALUE) {
+      return mapping.priority();
     }
 
-    @VisibleForTesting
-    void refresh() {
-        final Map<String, Object> handlerBeanMap =
-                applicationContext.getBeansWithAnnotation(LineMessageHandler.class);
-
-        final List<HandlerMethod> collect = handlerBeanMap
-                .values().stream()
-                .flatMap((Object bean) -> {
-                    final Method[] uniqueDeclaredMethods =
-                            ReflectionUtils.getUniqueDeclaredMethods(bean.getClass());
-
-                    return Arrays.stream(uniqueDeclaredMethods)
-                                 .map(method -> getMethodHandlerMethodFunction(bean, method))
-                                 .filter(Objects::nonNull);
-                })
-                .sorted(HANDLER_METHOD_PRIORITY_COMPARATOR)
-                .collect(Collectors.toList());
-
-        log.info("Registered LINE Messaging API event handler: count = {}", collect.size());
-        collect.forEach(item -> log.info("Mapped \"{}\" onto {}",
-                                         item.getSupportType(), item.getHandler().toGenericString()));
-
-        eventConsumerList = collect;
+    if (type == Event.class) {
+      return EventMapping.DEFAULT_PRIORITY_FOR_EVENT_IFACE;
     }
 
-    private HandlerMethod getMethodHandlerMethodFunction(Object consumer, Method method) {
-        final EventMapping mapping = AnnotatedElementUtils.getMergedAnnotation(method, EventMapping.class);
-        if (mapping == null) {
-            return null;
-        }
-
-        Preconditions.checkState(method.getParameterCount() == 1,
-                                 "Number of parameter should be 1. But {}",
-                                 (Object[]) method.getParameterTypes());
-        // TODO: Support more than 1 argument. Like MVC's argument resolver?
-
-        final Type type = method.getGenericParameterTypes()[0];
-
-        final Predicate<Event> predicate = new EventPredicate(type);
-        return new HandlerMethod(predicate, consumer, method,
-                                 getPriority(mapping, type));
+    if (type instanceof Class) {
+      return ((Class<?>) type).isInterface()
+          ? EventMapping.DEFAULT_PRIORITY_FOR_IFACE
+          : EventMapping.DEFAULT_PRIORITY_FOR_CLASS;
     }
 
-    private int getPriority(final EventMapping mapping, final Type type) {
-        if (mapping.priority() != EventMapping.DEFAULT_PRIORITY_VALUE) {
-            return mapping.priority();
-        }
-
-        if (type == Event.class) {
-            return EventMapping.DEFAULT_PRIORITY_FOR_EVENT_IFACE;
-        }
-
-        if (type instanceof Class) {
-            return ((Class<?>) type).isInterface()
-                   ? EventMapping.DEFAULT_PRIORITY_FOR_IFACE
-                   : EventMapping.DEFAULT_PRIORITY_FOR_CLASS;
-        }
-
-        if (type instanceof ParameterizedType) {
-            return EventMapping.DEFAULT_PRIORITY_FOR_PARAMETRIZED_TYPE;
-        }
-
-        throw new IllegalStateException();
+    if (type instanceof ParameterizedType) {
+      return EventMapping.DEFAULT_PRIORITY_FOR_PARAMETRIZED_TYPE;
     }
 
-    @Value
-    static class HandlerMethod {
-        Predicate<Event> supportType;
-        Object object;
-        Method handler;
-        int priority;
+    throw new IllegalStateException();
+  }
+
+  @Value
+  static class HandlerMethod {
+    Predicate<Event> supportType;
+    Object object;
+    Method handler;
+    int priority;
+  }
+
+  @PostMapping("${line.bot.handler.path:/callback}")
+  public void callback(@LineBotMessages List<Event> events) {
+    events.forEach(this::dispatch);
+  }
+
+  /**
+   * 修正箇所.
+   * @param model モデル
+   * @return
+   */
+  @RequestMapping("/test")
+  public ModelAndView test(Model model) {
+    System.out.println("起動");
+    model.addAttribute("testKey", "Test Thymeleaf!!");
+    return new ModelAndView("01_Login.html");
+  }
+
+  @VisibleForTesting
+  void dispatch(Event event) {
+    try {
+      dispatchInternal(event);
+    } catch (InvocationTargetException e) {
+      log.error("InvocationTargetException occurred.", e);
+    } catch (Error | Exception e) {
+      log.error(e.getMessage(), e);
+    }
+  }
+
+  private void dispatchInternal(final Event event) throws Exception {
+    final HandlerMethod handlerMethod = eventConsumerList
+        .stream()
+        .filter(consumer -> consumer.getSupportType().test(event))
+        .findFirst()
+        .orElseThrow(() -> new UnsupportedOperationException("Unsupported event type. " + event));
+    final Object returnValue = handlerMethod.getHandler().invoke(handlerMethod.getObject(), event);
+
+    handleReturnValue(event, returnValue);
+  }
+
+  private void handleReturnValue(final Event event, final Object returnValue) {
+    if (returnValue != null) {
+      returnValueConsumerFactory.createForEvent(event)
+          .accept(returnValue);
+    }
+  }
+
+  private static class EventPredicate implements Predicate<Event> {
+    private final Class<?> supportEvent;
+    private final Class<? extends MessageContent> messageContentType;
+
+    @SuppressWarnings("unchecked")
+    EventPredicate(final Type mapping) {
+      if (mapping == ReplyEvent.class) {
+        supportEvent = ReplyEvent.class;
+        messageContentType = null;
+      } else if (mapping instanceof Class) {
+        Preconditions.checkState(Event.class.isAssignableFrom((Class<?>) mapping),
+            "Handler argument type should BE-A Event. But {}",
+            mapping.getClass());
+        supportEvent = (Class<? extends Event>) mapping;
+        messageContentType = null;
+      } else {
+        final ParameterizedType parameterizedType = (ParameterizedType) mapping;
+        supportEvent = (Class<? extends Event>) parameterizedType.getRawType();
+        messageContentType = (Class<? extends MessageContent>) ((ParameterizedType) mapping)
+            .getActualTypeArguments()[0];
+      }
     }
 
-    @PostMapping("${line.bot.handler.path:/callback}")
-    public void callback(@LineBotMessages List<Event> events) {
-        events.forEach(this::dispatch);
+    @Override
+    public boolean test(final Event event) {
+      return supportEvent.isAssignableFrom(event.getClass())
+          && (messageContentType == null
+              || event instanceof MessageEvent
+                  && filterByType(messageContentType, ((MessageEvent<?>) event).getMessage()));
     }
 
-    @VisibleForTesting
-    void dispatch(Event event) {
-        try {
-            dispatchInternal(event);
-        } catch (InvocationTargetException e) {
-            log.error("InvocationTargetException occurred.", e);
-        } catch (Error | Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    private static boolean filterByType(final Class<?> clazz, final Object content) {
+
+      return clazz.isAssignableFrom(content.getClass());
     }
 
-    private void dispatchInternal(final Event event) throws Exception {
-        final HandlerMethod handlerMethod = eventConsumerList
-                .stream()
-                .filter(consumer -> consumer.getSupportType().test(event))
-                .findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException("Unsupported event type. " + event));
-        final Object returnValue = handlerMethod.getHandler().invoke(handlerMethod.getObject(), event);
+    @Override
+    public String toString() {
+      final StringBuilder sb = new StringBuilder();
 
-        handleReturnValue(event, returnValue);
+      sb.append('[');
+      if (messageContentType != null) {
+        sb.append(MessageEvent.class.getSimpleName())
+            .append('<')
+            .append(messageContentType.getSimpleName())
+            .append('>');
+      } else {
+        sb.append(supportEvent.getSimpleName());
+      }
+      sb.append(']');
+
+      return sb.toString();
     }
-
-    private void handleReturnValue(final Event event, final Object returnValue) {
-        if (returnValue != null) {
-            returnValueConsumerFactory.createForEvent(event)
-                                      .accept(returnValue);
-        }
-    }
-
-    private static class EventPredicate implements Predicate<Event> {
-        private final Class<?> supportEvent;
-        private final Class<? extends MessageContent> messageContentType;
-
-        @SuppressWarnings("unchecked")
-        EventPredicate(final Type mapping) {
-            if (mapping == ReplyEvent.class) {
-                supportEvent = ReplyEvent.class;
-                messageContentType = null;
-            } else if (mapping instanceof Class) {
-                Preconditions.checkState(Event.class.isAssignableFrom((Class<?>) mapping),
-                                         "Handler argument type should BE-A Event. But {}",
-                                         mapping.getClass());
-                supportEvent = (Class<? extends Event>) mapping;
-                messageContentType = null;
-            } else {
-                final ParameterizedType parameterizedType = (ParameterizedType) mapping;
-                supportEvent = (Class<? extends Event>) parameterizedType.getRawType();
-                messageContentType =
-                        (Class<? extends MessageContent>)
-                                ((ParameterizedType) mapping).getActualTypeArguments()[0];
-            }
-        }
-
-        @Override
-        public boolean test(final Event event) {
-            return supportEvent.isAssignableFrom(event.getClass())
-                   && (messageContentType == null
-                       || event instanceof MessageEvent
-                          && filterByType(messageContentType, ((MessageEvent<?>) event).getMessage()));
-        }
-
-        private static boolean filterByType(final Class<?> clazz, final Object content) {
-
-            return clazz.isAssignableFrom(content.getClass());
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-
-            sb.append('[');
-            if (messageContentType != null) {
-                sb.append(MessageEvent.class.getSimpleName())
-                  .append('<')
-                  .append(messageContentType.getSimpleName())
-                  .append('>');
-            } else {
-                sb.append(supportEvent.getSimpleName());
-            }
-            sb.append(']');
-
-            return sb.toString();
-        }
-    }
+  }
 }
