@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja"  xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<!-- Required meta tags -->
 		<meta charset="utf-8">
@@ -23,6 +23,7 @@
 		<div id="form-main">
 			<div id="form-div">
 			<form class="form" id="form1">
+				ここに表示<h1 th:text="${testKey}"></h1>
 				<p class="subject">
 					<input name="subject" type="text" class="feedback-input" id="subject" placeholder="お題（必須）" required maxlength="30" autocomplete="off"/>
 				</p>

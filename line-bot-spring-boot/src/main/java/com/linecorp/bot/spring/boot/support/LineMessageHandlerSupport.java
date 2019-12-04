@@ -34,9 +34,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.ui.Model;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
@@ -94,6 +97,13 @@ public class LineMessageHandlerSupport {
                 refresh();
             }
         });
+    }
+
+    @GetMapping("/test")
+    public ModelAndView test(Model model) {
+      System.out.println("起動");
+      model.addAttribute("testKey", "Test Thymeleaf!!");
+      return new ModelAndView("01_Login.html");
     }
 
     @VisibleForTesting

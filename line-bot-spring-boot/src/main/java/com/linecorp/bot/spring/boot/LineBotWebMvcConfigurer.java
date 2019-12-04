@@ -51,6 +51,7 @@ public class LineBotWebMvcConfigurer
     argumentResolvers.add(lineBotServerArgumentProcessor);
   }
 
+  //修正箇所
   @Override
   public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
     configurer.enable();

@@ -40,45 +40,45 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class LineBotServerInterceptor implements HandlerInterceptor {
-    @Autowired
-    private LineBotCallbackRequestParser lineBotCallbackRequestParser;
+  @Autowired
+  private LineBotCallbackRequestParser lineBotCallbackRequestParser;
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
-        if (!(handler instanceof HandlerMethod)) {
-            return true;
+  @Override
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
+    if (!(handler instanceof HandlerMethod)) {
+      return true;
+    }
+    
+    HandlerMethod hm = (HandlerMethod) handler;
+    MethodParameter[] methodParameters = hm.getMethodParameters();
+    for (MethodParameter methodParameter : methodParameters) {
+      if (methodParameter.getParameterAnnotation(LineBotMessages.class) != null) {
+        try {
+          CallbackRequest callbackRequest = lineBotCallbackRequestParser.handle(request);
+          LineBotServerArgumentProcessor.setValue(request, callbackRequest);
+          return true;
+        } catch (LineBotCallbackException e) {
+          log.info("LINE Bot callback exception: {}", e.getMessage());
+          response.sendError(HttpStatus.BAD_REQUEST.value());
+          try (PrintWriter writer = response.getWriter()) {
+            writer.println(e.getMessage());
+          }
+          return false;
         }
-
-        HandlerMethod hm = (HandlerMethod) handler;
-        MethodParameter[] methodParameters = hm.getMethodParameters();
-        for (MethodParameter methodParameter : methodParameters) {
-            if (methodParameter.getParameterAnnotation(LineBotMessages.class) != null) {
-                try {
-                    CallbackRequest callbackRequest = lineBotCallbackRequestParser.handle(request);
-                    LineBotServerArgumentProcessor.setValue(request, callbackRequest);
-                    return true;
-                } catch (LineBotCallbackException e) {
-                    log.info("LINE Bot callback exception: {}", e.getMessage());
-                    response.sendError(HttpStatus.BAD_REQUEST.value());
-                    try (PrintWriter writer = response.getWriter()) {
-                        writer.println(e.getMessage());
-                    }
-                    return false;
-                }
-            }
-        }
-        return true;
+      }
     }
+    return true;
+  }
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-                           ModelAndView modelAndView) throws Exception {
-    }
+  @Override
+  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+      ModelAndView modelAndView) throws Exception {
+  }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-                                Exception ex)
-            throws Exception {
-    }
+  @Override
+  public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+      Exception ex)
+      throws Exception {
+  }
 }
