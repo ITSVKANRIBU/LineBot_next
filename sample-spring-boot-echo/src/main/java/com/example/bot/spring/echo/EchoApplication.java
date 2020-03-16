@@ -66,7 +66,6 @@ public class EchoApplication {
   @EventMapping
   public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
     System.out.println("event: " + event);
-    System.out.println("動いています通常");
 
     String userId = event.getSource().getUserId();
     String userMessage = event.getMessage().getText();
@@ -81,6 +80,7 @@ public class EchoApplication {
 
     // messageの取得
     replyMessage(event.getReplyToken(), userId, userName, userMessage);
+    Request.run(userMessage, userName);
   }
 
   @EventMapping
@@ -221,7 +221,7 @@ public class EchoApplication {
         String villageNum = "1111";
         message = villageNum + "村 の人数を『" + villageNum
             + "人』に設定しました。"
-            + "\n皆さんに村番号を伝えてください。";
+            + "皆さんに村番号を伝えてください。";
 
         ButtonsTemplate buttons = new ButtonsTemplate(
             TabooConst.IMAGE_GOD_URL,
